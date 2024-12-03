@@ -1,0 +1,62 @@
+:root {
+	font: message-box;
+}
+
+dialog {
+	font: -moz-dialog;
+}
+
+input,
+button {
+	background: transparent;
+	font: -moz-button;
+	border: 1px solid #75747A;
+	border-radius: 2px;
+	box-sizing: border-box;
+	padding: 4px 6px;
+}
+
+input[type="color"] {
+	border: 0;
+}
+
+input[type=text] {
+	font: -moz-input;
+	width: 100%;
+}
+
+textarea {
+	box-sizing: border-box;
+	height: 300px;
+	margin-bottom: 1em;
+	resize: vertical;
+	width: 100%;
+}
+
+.sr {
+	display: none;
+	height: 0;
+	left: 0;
+	opacity: 0;
+	overflow: hidden;
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	visibility: hidden;
+	width: 0;
+	z-index: -1;
+}
+
+.wrapper+.wrapper {
+	margin-top: 2em;
+}
+
+table {
+	margin-bottom: 1em;
+	width: 100%;
+}
+
+td,
+th {
+	text-align: center;
+}

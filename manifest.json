@@ -1,0 +1,38 @@
+{
+	"manifest_version": 3,
+	"name": "Tab Marker",
+	"version": "1.0",
+	"description": "Distinguish between development environments using color and emojis in tabs.",
+	"permissions": [
+		"tabs",
+		"storage"
+	],
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	},
+	"action": {
+		"default_title": "Tab Marker"
+	},
+	"options_ui": {
+		"page": "options.html"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"<all_urls>"
+			],
+			"js": [
+				"content-script.js"
+			],
+			"run_at": "document_end"
+		}
+	],
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "tab-marker@example.com",
+			"strict_min_version": "91.0"
+		}
+	}
+}
