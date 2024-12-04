@@ -1,6 +1,7 @@
 {
 	"manifest_version": 3,
-	"name": "Tab Marker",
+	"name": "Tab Marker Extension",
+	"short_name": "Tab Marker",
 	"version": "1.0",
 	"description": "Distinguish between development environments using color and emojis in tabs.",
 	"permissions": [

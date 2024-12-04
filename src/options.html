@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="color-scheme" content="dark light" />
+	<meta name="theme-color" content="#2B2A33" />
+	<title>Tab Marker</title>
+	<link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+	<div class="wrapper">
+		<section>
+			<h2 class="panel-section-header">Configure</h2>
+			<table><tbody id="patterns"></tbody></table>
+			<p>
+				<label>
+					<input type="checkbox" id="blink-setting">
+					Use blinking emojis?
+				</label>
+			</p>
+			<div>
+				<button id="add-pattern">Add...</button>
+				<button id="export-btn">Export</button>
+				<button id="save-changes">Save Changes</button>
+			</div>
+			<p id="save-feedback"></p>
+		</section>
+		<section>
+			<h2>Import</h2>
+			<p>Use the following JSON syntax for importing (domain required):</p>
+			<pre>[
+  {
+    "domain": "example.com",
+    "banner": "true",
+    "emoji": "💜",
+    "color": "#FF0000"
+  }
+]</pre>
+			<textarea id="json-import" placeholder="Paste valid JSON..."></textarea>
+			<p>
+				<strong>Note:</strong> Importing will overwrite existing patterns.
+			</p>
+			<button id="import-btn">Import JSON</button>
+			<p id="import-feedback"></p>
+		</section>
+	</div>
+	<script src="options.js"></script>
+</body>
+</html>
