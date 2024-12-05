@@ -25,7 +25,7 @@
       setTimeout(() => {
         browser.tabs.sendMessage(tabId, {
           color: matchedPattern.color,
-          emoji: matchedPattern.emoji,
+          icon: matchedPattern.icon,
           banner: matchedPattern.banner,
         });
       }, 100);

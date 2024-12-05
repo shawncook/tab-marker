@@ -14,17 +14,13 @@ button, input, select, textarea {
     -moz-appearance: auto;
 }
 
-input,
 button {
-	background: transparent;
-	border: 1px solid #75747A;
-	border-radius: 2px;
-	box-sizing: border-box;
+	cursor: pointer;
 	padding: 4px 6px;
 }
 
-button {
-	cursor: pointer;
+input[type="checkbox"] {
+	margin-left: 0;
 }
 
 input[type="color"] {
@@ -32,15 +28,15 @@ input[type="color"] {
 }
 
 input[type=text] {
-	font: -moz-input;
 	width: 100%;
+	padding: 4px 6px;
 }
 
 textarea {
 	box-sizing: border-box;
-	font: inherit;
 	font-family: monospace;
-	min-height: 100px;
+	font-size: 0.875rem;
+	min-height: 120px;
 	padding: 0.5em;
 	width: 100%;
 }
@@ -60,26 +56,44 @@ textarea {
 }
 
 section ~ section {
-	margin-top: 3em;
+	border-top: 1px solid #75747A;
+	margin-top: 1.5em;
+	padding-top: 1.5em;
 }
 
 table {
-	border: 0;
 	border-collapse: collapse;
-	margin-bottom: 1em;
 	width: 100%;
 }
 
+th {
+	color: #75747A;
+	text-align: start;
+}
+
+thead th:not(:first-child),
+td:not(:first-child) {
+	text-align: center;
+}
+
+tbody td:last-child {
+	text-align: end;
+}
 
 th, td, tr {
   padding: 0;
 }
 
-td,
-th {
-	text-align: center;
+tfoot button {
+	margin-top: 1em;
 }
 
 p:empty {
 	margin: 0;
+}
+
+.buttons {
+	align-items: center;
+	display: flex;
+	gap: 1em;
 }

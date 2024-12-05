@@ -1,74 +1,139 @@
 (() => {
-
-  const elements = {
-    addPatternBtn: document.getElementById("add-pattern"),
-    exportBtn: document.getElementById("export-btn"),
-    importBtn: document.getElementById("import-btn"),
-    saveFeedback: document.getElementById("save-feedback"),
-    importFeedback: document.getElementById("import-feedback"),
-    jsonImport: document.getElementById("json-import"),
-    patternsContainer: document.getElementById("patterns"),
-    onSaveChangesBtn: document.getElementById("save-changes"),
-    blinkSetting: document.getElementById("blink-setting"),
+  const _els = {
+    buttons: {
+      add: document.getElementById("btn-add"),
+      export: document.getElementById("btn-export"),
+      import: document.getElementById("btn-import"),
+      save: document.getElementById("save-changes"),
+    },
+    messages: {
+      import: document.getElementById("msg-import"),
+      save: document.getElementById("msg-save"),
+    },
+    fields: {
+      blink: document.getElementById("field-blink"),
+      import: document.getElementById("field-import"),
+    },
+    tables: {
+      patterns: document.querySelector("tbody"),
+    },
   };
 
-  const iconChoices = [
+  const _iconChoices = [
     "⚠️", "⭐", "❌", "✅", "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎",
     "🔵", "🟢", "🟡", "🟠", "🔴", "🟣", "🟤", "⚪", "⚫", "🟩", "🟦", "🟧", "🟨", "🟥", "🟪", "🟫",
   ];
 
-  const createAppendTableHeader = () => {
-    const elm = document.createElement("tr");
-    elm.className = "pattern";
-    elm.innerHTML = `
-      <th>Domain</th>
-      <th>Color</th>
-      <th>Emoji</th>
-      <th>Banner</th>
-      <th></th>
-    `;
-    elements.patternsContainer.insertAdjacentElement("beforebegin", elm);
-  };
-
-  const isValidDomain = (domain) => {
-    const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
+  const _isValidDomain = (domain) => {
+    const domainRegex =
+      /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
     return domainRegex.test(domain);
   };
 
-  const loadPatterns = async () => {
+  const handleSave = async () => {
+    const blinkEnabled = _els.fields.blink.checked;
+
+    const patterns = Array.from(
+      _els.tables.patterns.querySelectorAll("tr")
+    )
+      .filter(
+        (row) => row.querySelector("input[type='text']").value.trim() !== ""
+      )
+      .map((row) => {
+        const [domainInput, colorInput, iconInput, productionInput] =
+          row.querySelectorAll("input, select");
+        const domain = domainInput.value.trim();
+        if (!_isValidDomain(domain)) {
+          throw new Error(`${domain} is an invalid domain.`);
+        }
+        return {
+          domain,
+          color: colorInput.value,
+          icon: iconInput.value,
+          banner: productionInput.checked,
+        };
+      });
+
+    await browser.storage.sync.set({ patterns, blinkEnabled });
+  };
+
+  const initDrag = () => {
+    const tbody = _els.tables.patterns;
+    let draggedRow;
+
+    tbody.addEventListener("dragstart", (e) => {
+      draggedRow = e.target;
+      e.target.style.opacity = 0.5;
+    });
+
+    tbody.addEventListener("dragend", (e) => {
+      e.target.style.opacity = "";
+    });
+
+    tbody.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      const targetRow = e.target.closest("tr");
+      if (targetRow && targetRow !== draggedRow) {
+        tbody.insertBefore(
+          draggedRow,
+          e.clientY >
+            targetRow.getBoundingClientRect().top + targetRow.offsetHeight / 2
+            ? targetRow.nextSibling
+            : targetRow
+        );
+      }
+    });
+  };
+
+  const initSettings = async () => {
+    const { blinkEnabled = false } = await browser.storage.sync.get(
+      "blinkEnabled"
+    );
+    _els.fields.blink.checked = blinkEnabled;
+  };
+
+  const initTable = () => {
+    const thead = document.createElement("thead");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <th scope="column">Domain</th>
+      <th scope="column">Color</th>
+      <th scope="column">Icon</th>
+      <th scope="column">Banner</th>
+      <th scope="column"></th>
+    `;
+    thead.appendChild(tr);
+    _els.tables.patterns.insertAdjacentElement("beforebegin", thead);
+  };
+
+  const initTableData = async () => {
     const { patterns = [] } = await browser.storage.sync.get("patterns");
     if (!patterns.length) return;
-    createAppendTableHeader();
     patterns
       .filter((pattern) => pattern.domain)
-      .forEach(({ domain, color, emoji, banner }) =>
-        onCreatePattern(domain, color, emoji, banner)
-      );
+      .forEach((pattern) => onAddRow(pattern));
   };
 
-  const loadSettings = async () => {
-    const { blinkEnabled = false } = await browser.storage.sync.get("blinkEnabled");
-    elements.blinkSetting.checked = blinkEnabled;
-  };
-
-  const onCreatePattern = (
+  const onAddRow = ({
     domain = "",
-    color = "#000000",
-    emoji = "",
-    banner = false
-  ) => {
+    color = "",
+    icon = "",
+    banner = false,
+  } = {}) => {
     const elm = document.createElement("tr");
-    elm.className = "pattern";
+    elm.draggable = true;
     elm.innerHTML = `
-      <td><input type="text" placeholder="Root Domain (e.g., example.com)" value="${domain}" /></td>
+      <td><input type="text" placeholder="Root Domain (e.g., example.com)" value="${
+        domain ?? ""
+      }" /></td>
       <td><input type="color" value="${color}" /></td>
       <td><select>
         <option value="" selected>--</option>
-        ${iconChoices
+        ${_iconChoices
           .map(
             (e) =>
               `<option value="${e}" ${
-                e === emoji ? "selected" : ""
+                e === icon ? "selected" : ""
               }>${e}</option>`
           )
           .join("")}
@@ -76,15 +141,16 @@
       <td><label><input type="checkbox" ${
         banner ? "checked" : ""
       } /><span class="sr">Display Banner?</span></label></td>
-      <td><button class="remove-pattern">Remove</button></td>
+      <td><button class="remove">Remove</button></td>
     `;
     elm
-      .querySelector(".remove-pattern")
+      .querySelector(".remove")
       .addEventListener("click", () => elm.remove());
-    elements.patternsContainer.appendChild(elm);
+    _els.tables.patterns.appendChild(elm);
+    elm.querySelector('input[type="text"]').focus();
   };
 
-  const onExportJSON = async () => {
+  const onExportClick = async () => {
     try {
       const { patterns } = await browser.storage.sync.get("patterns");
       const jsonData = JSON.stringify(patterns, null, 2);
@@ -100,91 +166,62 @@
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error exporting JSON:", error);
-      elements.saveFeedback.textContent = "Error exporting JSON. Please try again.";
+      _els.messages.save.textContent =
+        "Error exporting JSON. Please try again.";
     }
   };
 
-  const onImportJSON = async () => {
-    const jsonText = elements.jsonImport.value.trim();
+  const onImportClick = async () => {
+    const jsonText = _els.fields.import.value.trim();
     if (!jsonText) {
-      elements.importFeedback.textContent = "Please paste JSON data.";
+      _els.messages.import.textContent = "Please paste JSON data.";
       return;
     }
     try {
       const importedData = JSON.parse(jsonText);
       if (!Array.isArray(importedData)) {
-        elements.importFeedback.textContent = "JSON data must be an array.";
+        _els.messages.import.textContent = "JSON data must be an array.";
         return;
       }
-      elements.patternsContainer.innerHTML = "";
-      importedData.forEach(
-        ({
-          domain = "",
-          color = "#000000",
-          emoji = iconChoices[0],
-          banner = false,
-        }) => onCreatePattern(domain, color, emoji, banner)
+      _els.tables.patterns.innerHTML = "";
+      importedData.forEach((pattern) =>
+        onAddRow({
+          domain: pattern.domain || "",
+          color: pattern.color || "#000000",
+          icon: pattern.icon || _iconChoices[0],
+          banner: pattern.banner || false,
+        })
       );
-      await saveChanges();
-      elements.importFeedback.textContent = "JSON imported and saved.";
+      await handleSave();
+      _els.messages.import.textContent = "JSON imported and saved.";
     } catch (e) {
       console.error(e);
-      elements.importFeedback.textContent =
+      _els.messages.import.textContent =
         "Invalid JSON data. Please check your input.";
     }
   };
 
-  const onSaveChanges = async () => {
+  const onSaveClick = async () => {
     try {
-      await saveChanges();
-      elements.saveFeedback.textContent = "Changes saved.";
+      await handleSave();
+      _els.messages.save.textContent = "Changes saved.";
       setTimeout(() => {
-        elements.saveFeedback.textContent = "";
+        _els.messages.save.textContent = "";
       }, 3000);
     } catch (error) {
-      elements.saveFeedback.textContent = `Error saving changes: ${error.message}`;
+      _els.messages.save.textContent = `Error saving changes: ${error.message}`;
     }
   };
 
-  const saveChanges = async () => {
-
-    const blinkEnabled = elements.blinkSetting.checked;
-
-    const patterns = Array.from(
-      elements.patternsContainer.querySelectorAll(".pattern")
-    )
-      .filter(
-        (row) => row.querySelector("input[type='text']").value.trim() !== ""
-      )
-      .map((row) => {
-        const [domainInput, colorInput, emojiInput, productionInput] =
-          row.querySelectorAll("input, select");
-        const domain = domainInput.value.trim();
-        if (!isValidDomain(domain)) {
-          throw new Error(`${domain} is an invalid domain.`);
-        }
-        return {
-
-          domain,
-          color: colorInput.value,
-          emoji: emojiInput.value,
-          banner: productionInput.checked,
-        };
-      });
-
-    await browser.storage.sync.set({ patterns, blinkEnabled });
-  };
-
-  elements.importBtn.addEventListener("click", onImportJSON);
-  elements.exportBtn.addEventListener("click", onExportJSON);
-  elements.onSaveChangesBtn.addEventListener("click", onSaveChanges);
-  elements.addPatternBtn.addEventListener("click", () => {
-    onCreatePattern("", "", "", false)
-  });
+  _els.buttons.export.addEventListener("click", onExportClick);
+  _els.buttons.import.addEventListener("click", onImportClick);
+  _els.buttons.save.addEventListener("click", onSaveClick);
+  _els.buttons.add.addEventListener("click", () => onAddRow());
 
   document.addEventListener("DOMContentLoaded", () => {
-    loadPatterns();
-    loadSettings();
+    initTable();
+    initTableData();
+    initSettings();
+    initDrag();
   });
-
 })();

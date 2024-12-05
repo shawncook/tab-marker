@@ -33,16 +33,16 @@
 
   const modifyPageTitle = (message, blinkEnabled) => {
     const originalTitle = document.title;
-    const emojiTitle = `${message.emoji ?? ''} ${originalTitle}`;
+    const iconTitle = `${message.icon ?? ''} ${originalTitle}`;
 
     if (message.banner && blinkEnabled) {
-      let isEmojiVisible = true;
+      let iconVisible = true;
       setInterval(() => {
-        document.title = isEmojiVisible ? emojiTitle : originalTitle;
-        isEmojiVisible = !isEmojiVisible;
-      }, 1000); // Toggle every 1 second
+        document.title = iconVisible ? iconTitle : originalTitle;
+        iconVisible = !iconVisible;
+      }, 1000);
     } else {
-      document.title = emojiTitle;
+      document.title = iconTitle;
     }
   };
 
@@ -55,12 +55,11 @@
     }
   };
 
-  const resetIsModified = () => {
-    isModified = false;
-  };
 
-  // Register event listeners
   browser.runtime.onMessage.addListener(onMessageHandler);
-  window.addEventListener('beforeunload', resetIsModified);
+
+  window.addEventListener('beforeunload', () => {
+    isModified = false;
+  });
 
 })();

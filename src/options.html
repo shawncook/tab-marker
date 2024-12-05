@@ -13,38 +13,45 @@
 <body>
 	<div class="wrapper">
 		<section>
-			<h2 class="panel-section-header">Configure</h2>
-			<table><tbody id="patterns"></tbody></table>
+			<h2 class="panel-section-header">Configure Tab Markers</h2>
+			<table>
+				<tbody></tbody>
+				<tfoot>
+					<tr>
+						<td colspan="100%">
+							<button id="btn-add">Add...</button>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
 			<p>
 				<label>
-					<input type="checkbox" id="blink-setting">
-					Use blinking emojis?
+					<input type="checkbox" id="field-blink">
+					Blink icon when banner is active
 				</label>
 			</p>
-			<div>
-				<button id="add-pattern">Add...</button>
-				<button id="export-btn">Export</button>
-				<button id="save-changes">Save Changes</button>
-			</div>
-			<p id="save-feedback"></p>
+			<p class="buttons">
+				<button id="btn-export">Export</button>
+				<button id="save-changes">Save</button>
+				<span id="msg-save"></span>
+			</p>
 		</section>
 		<section>
-			<h2>Import</h2>
-			<p>Use the following JSON syntax for importing (domain required):</p>
-			<pre>[
-  {
-    "domain": "example.com",
-    "banner": "true",
-    "emoji": "💜",
-    "color": "#FF0000"
-  }
-]</pre>
-			<textarea id="json-import" placeholder="Paste valid JSON..."></textarea>
+			<h2>Import JSON</h2>
 			<p>
 				<strong>Note:</strong> Importing will overwrite existing patterns.
 			</p>
-			<button id="import-btn">Import JSON</button>
-			<p id="import-feedback"></p>
+			<textarea id="field-import" placeholder='[
+  {
+    "domain": "example.com", <!-- required -->
+    "banner": "true",
+    "icon": "💜",
+    "color": "#FF0000"
+  },
+  ...
+]'></textarea>
+			<p><button id="btn-import">Import</button></p>
+			<p id="msg-import"></p>
 		</section>
 	</div>
 	<script src="options.js"></script>
